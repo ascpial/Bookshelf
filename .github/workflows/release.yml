@@ -1,0 +1,32 @@
+name: Publish on platforms
+
+on:
+  # Triggers the action when a release is published
+  release:
+    types: [ published ]
+
+jobs:
+  publish:
+   # linux best
+    runs-on: ubuntu-latest
+  
+    steps:
+      # Get the source code
+      - uses: actions/checkout@v3
+
+      - name: Run the resource pack packager
+        run: |
+          cd $GITHUB_WORKSPACE
+          python3 distribute.py
+
+      - name: Upload assets to the release
+        run: |
+          set -x
+          assets=()
+          for asset in ./build/*.zip; do
+            assets+=("-a" "$asset")
+          done
+          tag_name="${GITHUB_REF##*/}"
+          hub release create "${assets[@]}" -m "$tag_name" "$tag_name"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
