@@ -1,4 +1,4 @@
-name: Publish on platforms
+name: Upload build assets
 
 on:
   # Triggers the action when a release is published

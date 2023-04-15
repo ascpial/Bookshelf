@@ -112,6 +112,8 @@ def list_modules() -> list[str]:
     return [module[3:] for module in modules]
 
 if __name__ == "__main__":
+    if not os.path.exists("./build"):
+        os.mkdir("build")
     print("🏞 Creating world archive")
     create_archive(
         "build/Demo-world.zip",
