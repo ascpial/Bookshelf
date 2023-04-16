@@ -17,7 +17,8 @@ jobs:
       - name: Run the resource pack packager
         run: |
           cd $GITHUB_WORKSPACE
-          python3 distribute.py
+          tag_name="${GITHUB_REF##*/}"
+          python3 distribute.py --version ${tag_name}
 
       - name: Upload assets to the release
         run: |
