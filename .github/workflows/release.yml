@@ -23,6 +23,9 @@ jobs:
       - name: Upload assets to the release
         run: |
           tag_name="${GITHUB_REF##*/}"
+          gh release view --json body -q .body > release-note.md
+          echo -e >> release-note.md && echo "⚠ Most modules rely on \`bs.core\` module. Don't forget to download it!" >> release-note.md
+          gh release edit ${tag_name} --notes-file release-note.md
           gh release upload ${tag_name} build/*
         env:
           GH_TOKEN: ${{ github.token }}
