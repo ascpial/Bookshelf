@@ -1,6 +1,8 @@
 import zipfile
 import glob
 import os
+import argparse
+import sys
 
 DATAPACK_PATTERNS = [
     "**/*.mcfunction",
@@ -81,11 +83,12 @@ def get_core_datapack_files() -> list[str]:
     )
 
 def get_module_datapack_files(module_name: str) -> list[str]:
-    return get_core_datapack_files() + \
-        get_files(
+    return get_files(
             "datapacks/Bookshelf",
             [
-                f"data/bs.{module_name}",
+                f"data/{module_name}",
+                "icon.png",
+                "pack.mcmeta",
             ],
             DATAPACK_PATTERNS,
         )
@@ -105,40 +108,87 @@ def create_archive(filename: str, base_folder: str, files: list[str]):
 
 def list_modules() -> list[str]:
     modules = os.listdir("datapacks/Bookshelf/data")
-    modules.remove("bs")
     modules.remove("bs.core")
     modules.remove("minecraft")
 
-    return [module[3:] for module in modules]
+    return modules
 
-if __name__ == "__main__":
-    if not os.path.exists("./build"):
-        os.mkdir("build")
+def create_world_archive(filename: str = 'build/World.zip'):
     print("🏞 Creating world archive")
     create_archive(
-        "build/World.zip",
+        filename,
         ".",
         get_world_files(),
     )
 
+def create_datapack_archive(filename: str = 'build/Bookshelf.zip'):
     print("🗄 Creating datapack archive")
     create_archive(
-        "build/Bookshelf.zip",
+        filename,
         "datapacks/Bookshelf",
         get_datapack_files(),
     )
 
+def create_core_module_archive(filename: str = 'build/Bookshelf-core.zip'):
     print("🔩 Creating core module archive")
     create_archive(
-        "build/Bookshelf-core.zip",
+        filename,
         "datapacks/Bookshelf",
         get_core_datapack_files(),
     )
 
+def create_modules_archive(filename: str = "build/Bookshelf-{}.zip"):
     for module in list_modules():
         print(f"🧩 Creating archive for module {module}")
         create_archive(
-            f"build/Bookshelf-{module}.zip",
+            filename.format(module[3:] if module.startswith('bs.') else module),
             "datapacks/Bookshelf",
             get_module_datapack_files(module),
+        )
+
+if __name__ == "__main__":
+    if not os.path.exists("./build"):
+        os.mkdir("build")
+    
+    parser = argparse.ArgumentParser(
+        description="Pack Bookshelf in nice zip files",
+    )
+    parser.add_argument(
+        "-w", "--world", type=int, default=1,
+        help="Export world. Set to 0 to disable.", metavar="EXPORT",
+    )
+    parser.add_argument(
+        "-d", "--datapack", type=int, default=1,
+        help="Export entire datapack. Set to 0 to disable.", metavar="EXPORT",
+    )
+    parser.add_argument(
+        "-c", "--core", type=int, default=1,
+        help="Export core module. Set to 0 to disable.", metavar="EXPORT",
+    )
+    parser.add_argument(
+        "-m", "--modules", type=int, default=1,
+        help="Export every module. Set to 0 to disable.", metavar="EXPORT",
+    )
+    parser.add_argument(
+        "-v", "--version", type=str, required=False,
+        help="Specify the lib version in zip filename",
+    )
+
+    args = parser.parse_args()
+
+    if args.world:
+        create_world_archive(
+            f'build/World{"-" + args.version if args.version else ""}.zip',
+        )
+    if args.datapack:
+        create_datapack_archive(
+            f'build/Bookshelf{"-" + args.version if args.version else ""}.zip',
+        )
+    if args.core:
+        create_core_module_archive(
+            f'build/Bookshelf-core{"-" + args.version if args.version else ""}.zip',
+        )
+    if args.modules:
+        create_modules_archive(
+            'build/Bookshelf-{}'+f'{"-" + args.version if args.version else ""}.zip',
         )
