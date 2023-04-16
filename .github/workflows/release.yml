@@ -21,10 +21,8 @@ jobs:
 
       - name: Upload assets to the release
         run: |
-          set -x
-          assets=()
-          for asset in ./build/*.zip; do
-            assets+=("-a" "$asset")
-          done
           tag_name="${GITHUB_REF##*/}"
           gh release upload ${tag_name} build/*
+        env:
+          GH_TOKEN: ${{ github.token }}
+        
