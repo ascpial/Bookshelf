@@ -21,7 +21,7 @@ def get_files(
 ) -> list[str]:
     files = []
     folders = []
-    
+
     for path in path_list:
         if os.path.isfile(os.path.join(base_folder, path)):
             files.append(path)
@@ -116,14 +116,14 @@ if __name__ == "__main__":
         os.mkdir("build")
     print("🏞 Creating world archive")
     create_archive(
-        "build/Demo-world.zip",
+        "build/World.zip",
         ".",
         get_world_files(),
     )
 
     print("🗄 Creating datapack archive")
     create_archive(
-        "build/Bookshelf-release.zip",
+        "build/Bookshelf.zip",
         "datapacks/Bookshelf",
         get_datapack_files(),
     )
